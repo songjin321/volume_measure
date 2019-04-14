@@ -1,4 +1,4 @@
-
+## 使用VINS-Mobile获取的各个角度的物体图片和对应的相机内外参数进行三维重建并计算物体体积
 import numpy as np
 import sys
 import cv2 as cv
@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from path import Path
 from skimage import measure
 
-data_path = Path('/home/neousys/Project/volume_measure/DataFromVINS/box')
+data_path = Path('/home/neousys/Project/volume_measure/DataFromVINS/orange')
 image_path = data_path/'IMAGE'
 camera_path = data_path/'POSES'
 img_num = len(image_path.listdir())
@@ -38,13 +38,12 @@ columns = 4
 rows = 5
 for i in range(1, columns*rows +1):
     fig.add_subplot(rows, columns, i)
-    plt.imshow(images[i-1])
-# plt.show()
+    plt.imshow(img_segmentation[i-1])
+plt.show()
 
-# save it to file
+# save and load img_segmentation_mask
 # np.save(data_path/'segmentation_mask.npy', img_segmentation_mask)
-
-img_segmentation_mask = np.load(data_path/'segmentation_mask.npy')
+# img_segmentation_mask = np.load(data_path/'segmentation_mask.npy')
 
 # load camera params
 # camera intrinsics
@@ -63,9 +62,9 @@ for i,cam_file in enumerate(camera_path.files('*.txt')):
     P = K @ np.hstack((R, t))
     cam_params[i] = P
 
-##### visula hull reconstruction
+##### visula hull reconstruction #######
 # create voxel grid
-voxel_size = 0.005
+voxel_size = 0.01
 dimension_lim = 0.5
 voxels_number = int(pow(dimension_lim*2/voxel_size, 3))
 voxels = np.zeros((voxels_number, 4))
@@ -93,7 +92,7 @@ for i in range(img_num):
     img_val = cur_silhouette[point_cam[0,:], point_cam[1,:]]
     voxels[:, 3] = voxels[:, 3] + img_val
 
-# disply voxel using march cube algorithm
+# calculate object isosurface using march cube algorithm
 error_amount = 5
 maxv = np.amax(voxels[:,3])
 iso_value = maxv-np.round(((maxv)/100)*error_amount)-0.5
