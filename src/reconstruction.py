@@ -5,10 +5,14 @@ from path import Path
 from skimage import measure
 from mpl_toolkits.mplot3d import Axes3D
 from stl import mesh
+import sys
+sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+import cv2
 
 data_path = Path('/home/neousys/Project/volume_measurement/DataFromMobile/dinoSparseRing')
 image_path = data_path/'IMAGE'
 cam_file = data_path/'pose.txt'
+mask_path = data_path/'MASK'
 img_num = len(image_path.listdir())
 img_width = 640
 img_heigth = 480
@@ -70,7 +74,8 @@ maxv = np.amax(voxels[:,3])
 iso_value = maxv-np.round(((maxv)/100)*error_amount)-0.5
 # convert voxels list to voxel 3d  z x y 
 voxels_3d = voxels[:,-1].reshape(dim_size, dim_size, dim_size,order='F')
-verts, faces, normals, values = measure.marching_cubes_lewiner(voxels_3d, iso_value, spacing=(0.1, 0.1, 0.1))
+verts, faces, normals, values = measure.marching_cubes_lewiner(voxels_3d, iso_value, spacing=(1, 1, 1))
+
 '''
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -87,6 +92,16 @@ for i, f in enumerate(faces):
 # Write the mesh to file "cube.stl"
 cube.save('cube.stl')
 
-# TODO: calculate object volume from isosurface
-
-print("Hello world!")
+# calculate object volume from verts, metric:mm
+verts_xy = verts[:,:2].astype(np.int32)[:,np.newaxis,:]
+minirect = cv2.minAreaRect(verts_xy)
+minbox = cv2.boxPoints(minirect)
+zmax = np.amax(verts[:,2])
+zmin = np.amin(verts[:,2])
+# using Shoelace formula calculate area
+xy_area = 0.0
+for i in range(2):
+    xy_area = xy_area + (minbox[i][0]*minbox[i+1][1]-minbox[i+1][0]*minbox[i][1])
+volume = (zmax-zmin)*np.fabs(xy_area)/2.0
+print("volume = %f cm^3" % (volume/1000.0))
+print("Hello World!")
