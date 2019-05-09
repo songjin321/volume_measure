@@ -10,7 +10,7 @@ def fun(x, y, z):
 
 x, y, z = pi*np.mgrid[-1:1:31j, -1:1:31j, -1:1:31j]
 vol = fun(x, y, z)
-verts, faces, normals, values = measure.marching_cubes_lewiner(vol, 0, spacing=(1, 1, 1))
+verts, faces, normals, values = measure.marching_cubes_lewiner(vol, 0, spacing=(0.5, 0.5, 0.5))
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')

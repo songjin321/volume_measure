@@ -5,6 +5,8 @@ from path import Path
 from skimage import measure
 from mpl_toolkits.mplot3d import Axes3D
 from stl import mesh
+from multiprocessing import pool
+import time
 import sys
 sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
@@ -30,32 +32,22 @@ cam_params = K @ np.concatenate((R, t), axis=2)
 
 ##### visula hull reconstruction #######
 # create voxel grid
-voxel_size = 0.001
-dimension_lim = 0.1
+voxel_size = 0.002
+dimension_lim = 0.25
 dim_size = int(dimension_lim*2/voxel_size)
 voxels_number = int(pow(dimension_lim*2/voxel_size, 3))
-voxels = np.zeros((voxels_number, 4))
-'''
-x=np.arange(-0.07, 0.02, voxel_size)
-y=np.arange(-0.02, 0.07, voxel_size)
-z=np.arange(0.02, -0.07,  -voxel_size)
-dim_size=int(0.09/voxel_size+1)
-voxels_number = int(pow(0.09/voxel_size+1, 3))
-X,Z,Y = np.meshgrid(x,z,y)
-'''
 x=y=z=np.arange(-dimension_lim, dimension_lim, voxel_size)
 Y,Z,X = np.meshgrid(x,y,z)
-voxels = np.vstack((X.flatten(), Y.flatten(), Z.flatten(), np.zeros(voxels_number))).T
+object_point_3D = np.vstack((X.flatten(), Y.flatten(), Z.flatten(), np.ones(voxels_number)))
+# store the parallel processing result
+img_val = np.ones((img_num, voxels_number)).astype(np.uint8)
 
-# project voxel to silhouette
-object_point_3D = np.zeros(voxels.T.shape)
-object_point_3D[:] = voxels.T
-object_point_3D[3,:] = np.ones((1, voxels_number))
-for i in range(img_num):
-    print("process image %d/%d" % (i, img_num))
+# for each silhouette, project entire voxel to it
+def process_image(img_index):
+    print("process image %d " % (img_index))
     
     # project voxel point to 2D image plane
-    P = cam_params[i]
+    P = cam_params[img_index]
     point2D = P @ object_point_3D
     point_cam = np.floor(point2D/point2D[2,:]) # 3 x voxels_number
     
@@ -63,20 +55,25 @@ for i in range(img_num):
     point_cam = np.where((point_cam[0,:] > (img_width-1))|(point_cam[1,:] > (img_heigth-1))|(point_cam<0),1,point_cam).astype(np.uint32)
 
     # increase counter of each voxel for object pixel
-    cur_silhouette = img_segmentation_mask[i, :, :]
+    cur_silhouette = img_segmentation_mask[img_index, :, :]
 
-    img_val = cur_silhouette[point_cam[1,:], point_cam[0,:]]
-    voxels[:, 3] = voxels[:, 3] + img_val
+    img_val[img_index, :] = cur_silhouette[point_cam[1,:], point_cam[0,:]]
 
+#with pool.Pool(6) as p:
+#        p.map(process_image, range(img_num))
+for i in range(img_num):
+        process_image(i)
+voxels_value_flatten = np.sum(img_val, axis=0)
 ## calculate object isosurface using march cube algorithm
 error_amount = 5
-maxv = np.amax(voxels[:,3])
+maxv = np.amax(voxels_value_flatten)
 iso_value = maxv-np.round(((maxv)/100)*error_amount)-0.5
 # convert voxels list to voxel 3d  z x y 
-voxels_3d = voxels[:,-1].reshape(dim_size, dim_size, dim_size,order='F')
-verts, faces, normals, values = measure.marching_cubes_lewiner(voxels_3d, iso_value, spacing=(1, 1, 1))
+voxels_3d = voxels_value_flatten.reshape(dim_size, dim_size, dim_size,order='F')
+verts, faces, normals, values = measure.marching_cubes_lewiner(voxels_3d, iso_value, spacing=(1,1,1))
 
 '''
+# try to using plotly to imshow 3d mesh
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_trisurf(verts[:, 0], verts[:,1], faces, verts[:, 2], lw=1)
@@ -90,18 +87,21 @@ for i, f in enumerate(faces):
         cube.vectors[i][j] = verts[f[j],:]
 
 # Write the mesh to file "cube.stl"
-cube.save('cube.stl')
+timestr = time.strftime("%Y%m%d-%H%M%S")
+cube.save(timestr+'-cube.stl')
 
 # calculate object volume from verts, metric:mm
-verts_xy = verts[:,:2].astype(np.int32)[:,np.newaxis,:]
+verts_xy = verts[:,:2][:,np.newaxis,:]
 minirect = cv2.minAreaRect(verts_xy)
 minbox = cv2.boxPoints(minirect)
 zmax = np.amax(verts[:,2])
 zmin = np.amin(verts[:,2])
 # using Shoelace formula calculate area
 xy_area = 0.0
-for i in range(2):
+for i in range(3):
     xy_area = xy_area + (minbox[i][0]*minbox[i+1][1]-minbox[i+1][0]*minbox[i][1])
-volume = (zmax-zmin)*np.fabs(xy_area)/2.0
+xy_area = xy_area + (minbox[3][0]*minbox[0][1]-minbox[0][0]*minbox[3][1]) 
+scale = voxel_size*1000.0    
+volume = (zmax-zmin)*np.fabs(xy_area)/2.0 * scale * scale * scale
 print("volume = %f cm^3" % (volume/1000.0))
 print("Hello World!")
