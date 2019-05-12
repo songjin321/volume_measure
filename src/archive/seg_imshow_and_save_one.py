@@ -6,7 +6,7 @@ from skimage import measure
 from skimage import io
 import re
 
-data_path = Path('/home/neousys/Project/volume_measurement/DataFromMobile/detexture')
+data_path = Path('/home/neousys/Project/volume_measurement/data/detexture')
 segmentation_path = data_path/'mask'
 
 img_num = len(segmentation_path.files('*.npy'))

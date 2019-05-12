@@ -17,7 +17,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-data_path = Path('/home/neousys/Project/volume_measurement/DataFromMobile/detexture')
+data_path = Path('/home/neousys/Project/volume_measurement/data/dinoSparseRing')
 image_path = data_path/'IMAGE'
 cam_file = data_path/'pose.txt'
 
