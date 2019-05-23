@@ -43,8 +43,7 @@ def main(arg):
     
     # 读取点云robust_aligned.ply，去除离群点，并计算体积
     #### 读取点云,去除离群点 #####
-    pcd = read_point_cloud(
-        arg[1])
+    pcd = read_point_cloud(arg[1])
     print(pcd)
 
     index_rm_cam = []
@@ -107,8 +106,6 @@ def main(arg):
     verts_xy = verts[:,:2][:,np.newaxis,:]
     minirect = cv2.minAreaRect(verts_xy)
     minbox = cv2.boxPoints(minirect)
-
-
     zmax = np.amax(verts[:, 2])
 
     draw_obj_box(pcd, minbox, zmax)
@@ -116,14 +113,19 @@ def main(arg):
     #zmin = np.amin(verts[:,2])
     zmin = 0
     # calculate area using Shoelace formulation
+    '''
     xy_area = 0.0
     for i in range(3):
         xy_area = xy_area + (minbox[i][0]*minbox[i+1][1]-minbox[i+1][0]*minbox[i][1])
     xy_area = xy_area + (minbox[3][0]*minbox[0][1]-minbox[0][0]*minbox[3][1])   
     volume = (zmax-zmin)*np.fabs(xy_area)/2.0
-
+    '''
+    length = np.max(minirect[1])
+    width = np.min(minirect[1])
+    height = zmax-zmin
+    volume = height*length*width
     print("volume = %f cm^3" % (volume/1000.0))
-
+    print("\033[93mlength = %.2f mm\nwidth = %.2f mm\nheight = %.2f mm\033[0m" % (length, width, height))
 if __name__ == "__main__":
 
     main(sys.argv)

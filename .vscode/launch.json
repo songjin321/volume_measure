@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["/home/neousys/Project/volume_measurement/data/shoe_tag/reconstruction_sequential/sfm_data.json"]
+            "args": ["/home/neousys/Project/volume_measurement/data/shoe_tag_0/reconstruction_sequential/robust_aligned.ply"]
         },
         {
             "name": "Python: Remote Attach",
