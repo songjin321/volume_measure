@@ -22,11 +22,21 @@ python src/sfm/measurement.py data/shoe_tag/reconstruction_sequential/robust_ali
 ```
 
 4（optional）结合手机上的web界面,将手机采集的数据保存在online_data文件夹中，然后在这里进行在线实时重建
-- 监测到新建一个文件夹ms1/image,开始测量
-- 当image中文件图片数量达到10张开始重建，然后新加一张图片，重新进行一次测量
+- 监测到新建一个文件夹ms*/image,开始测量
+- 当image中文件图片数量达到10张开始重建，然后新加5张图片，重新进行一次测量
 
 ```bash
-python src/sfm/sfm_online.py data/online_data
+cd data/online_data
+python3 ../../src/tcc/html/tcc-backend/uploadServer.py
+
+cd src/tcc/html/tcc-frontend
+HTTPS=true npm start
+
+在手机浏览器上打开chrome，连上同一个局域网，输入电脑ip地址加3000，使用https，https:192.168.1.201:3000。按一下connect server，连上服务器，刷新一下表示重新测量
+
+开启在线三维重建,记得将相机内参写到相对应的位置
+python3 src/sfm/sfm_online.py data/online_data  
+
 ```
 
 

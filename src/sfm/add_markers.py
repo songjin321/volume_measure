@@ -1,7 +1,8 @@
 # Sample code: Detect Aruco Markers and add them to the OpenMVG json SfM scene file
 # Author: Etienne Danvoye
 import sys
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+if '/opt/ros/kinetic/lib/python2.7/dist-packages' in sys.path:  
+    sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
 import json
 import sys
