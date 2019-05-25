@@ -44,7 +44,7 @@ def cal_result_print(minirect, zmax):
     length = np.max(minirect[1])
     width = np.min(minirect[1])
     # 坐标原点在tag平面上，tag在3mm的板子上
-    height = zmax + 3
+    height = zmax
     volume = height*length*width
 
     print("volume = %f cm^3" % (volume/1000.0))
@@ -80,27 +80,13 @@ class Measurement():
 
         pcd_rm_cam = select_down_sample(pcd, index_rm_cam)
 
-        #pcd.paint_uniform_color([1, 0.706, 0])
-        #draw_geometries([pcd])
-
-        print("Radius oulier removal")
-        cl_r, ind = radius_outlier_removal(pcd_rm_cam,
-                                        nb_points=2, radius=25)
-        #display_inlier_outlier(pcd_rm_cam, ind)
+        pcd_rm_cam.paint_uniform_color([1, 0.706, 0])
+        draw_geometries([pcd_rm_cam])
 
 
-        print("Statistical oulier removal")
-        cl_s, ind = statistical_outlier_removal(cl_r,
-                                            nb_neighbors=3, std_ratio=2)
-        #display_inlier_outlier(cl_r, ind)
-
-        print("Radius oulier removal 2")
-        cl_r, ind = radius_outlier_removal(cl_s,
-                                        nb_points=2, radius=25)
-        #display_inlier_outlier(cl_s, ind)
 
         # verts表示点云，N代表点的个数，3表示点的x，y，z坐标, 单位mm。将点云赋值给verts
-        cl_obj_with_ground = cl_r
+        cl_obj_with_ground = pcd_rm_cam
         #verts = np.zeros((N, 3))
 
         verts = []

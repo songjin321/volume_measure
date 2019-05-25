@@ -76,12 +76,12 @@ def renconstruct_measure():
     line_set = mes_instance.line_set
     [length, width, height] = mes_instance.result
     """
-    
+
 class AddImageEventHandler(FileSystemEventHandler):
     def __init__(self):
         ## image counter in every measure
         self.image_counter = 1
-        self.counter_timeline = 10
+        self.counter_timeline = 20
         self.p = None
     def on_created(self, event):
         super(AddImageEventHandler, self).on_created(event)
@@ -93,7 +93,9 @@ class AddImageEventHandler(FileSystemEventHandler):
             ## for each image extract sift feature
             print ("1. Intrinsics analysis")
             print(input_dir)
-            pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params, "-k", "1583.57344776699; 0.; 500.842288940575; 0.; 1584.03592624341; 944.606239259718; 0.; 0.; 1."] )
+            # "-k", "1583.57344776699; 0.; 500.842288940575; 0.; 1584.03592624341; 944.606239259718; 0.; 0.; 1."
+            # "-k", "3164.77123462349; 0.; 1992.46181207780; 0.; 3166.29890453081; 1560.62404217458; 0.; 0.; 1."
+            pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params] )
             pIntrisics.wait()
 
             print ("2. Compute features")

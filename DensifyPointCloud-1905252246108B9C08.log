@@ -1,0 +1,29 @@
+22:46:10 [App     ] Build date: May 11 2019, 00:08:57
+22:46:10 [App     ] CPU: Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz
+22:46:10 [App     ] RAM: 31.31GB Physical Memory 975.00MB Virtual Memory
+22:46:10 [App     ] OS: Linux 4.15.0-50-generic (x86_64)
+22:46:10 [App     ] SSE & AVX compatible CPU & OS detected
+22:46:10 [App     ] Command line: data/test/dense2_result/reconstruction_sequential/scene.mvs
+22:46:10 [App     ] MapSMtoCores for SM 6.1 is undefined; default to use 128 cores/SM
+22:46:10 [App     ] CUDA device 0 initialized: GeForce GTX 1060 6GB (compute capability 6.1; memory 5.93GB)
+22:46:10 [App     ] Camera model loaded: platform 0; camera  0; f 1.011x1.011; poses 2
+22:46:10 [App     ] Image loaded   0: IMG_20190525_224058.jpg
+22:46:10 [App     ] Image loaded   1: IMG_20190525_224102.jpg
+22:46:10 [App     ] Scene loaded from interface format (5ms):
+	2 images (2 calibrated) with a total of 23.19 MPixels (11.60 MPixels/image)
+	714 points, 0 vertices, 0 faces
+22:46:10 [App     ] Preparing images for dense reconstruction completed: 2 images (85ms)
+22:46:10 [App     ] Selecting images for dense reconstruction completed: 2 images (0ms)
+22:46:11 [App     ] Reference image   1 paired with 1 views
+22:46:11 [App     ] Reference image   0 paired with 1 views
+22:46:12 [App     ] Depth map   1 filtered using 1 other images: 0/0 depths discarded (67ms)
+22:46:12 [App     ] Depth map   0 filtered using 1 other images: 0/0 depths discarded (72ms)
+22:46:13 [App     ] Depth-maps fused and filtered: 2 depth-maps, 0 depths, 0 points (-2147483648%%) (590ms)
+22:46:13 [App     ] Densifying point-cloud completed: 0 points (3s53ms)
+22:46:13 [App     ] Scene saved (0ms):
+	2 images (2 calibrated)
+	0 points, 0 vertices, 0 faces
+22:46:13 [App     ] MEMORYINFO: {
+22:46:13 [App     ] 	VmPeak:	14911756 kB
+22:46:13 [App     ] 	VmSize:	14767696 kB
+22:46:13 [App     ] } ENDINFO

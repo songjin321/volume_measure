@@ -1,0 +1,40 @@
+21:59:51 [App     ] Build date: May 11 2019, 00:08:57
+21:59:51 [App     ] CPU: Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz
+21:59:51 [App     ] RAM: 31.31GB Physical Memory 975.00MB Virtual Memory
+21:59:51 [App     ] OS: Linux 4.15.0-50-generic (x86_64)
+21:59:51 [App     ] SSE & AVX compatible CPU & OS detected
+21:59:51 [App     ] Command line: data/test/image14_result/reconstruction_sequential/scene.mvs
+21:59:51 [App     ] MapSMtoCores for SM 6.1 is undefined; default to use 128 cores/SM
+21:59:51 [App     ] CUDA device 0 initialized: GeForce GTX 1060 6GB (compute capability 6.1; memory 5.93GB)
+21:59:51 [App     ] Camera model loaded: platform 0; camera  0; f 0.782x0.782; poses 5
+21:59:51 [App     ] Image loaded   0: IMG_20190511_225647.jpg
+21:59:51 [App     ] Image loaded   1: IMG_20190511_225709.jpg
+21:59:51 [App     ] Image loaded   2: IMG_20190511_225724.jpg
+21:59:51 [App     ] Image loaded   3: IMG_20190511_225813.jpg
+21:59:51 [App     ] Image loaded   4: IMG_20190511_225923.jpg
+21:59:51 [App     ] Scene loaded from interface format (14ms):
+	5 images (5 calibrated) with a total of 57.99 MPixels (11.60 MPixels/image)
+	638 points, 0 vertices, 0 faces
+21:59:51 [App     ] Preparing images for dense reconstruction completed: 5 images (108ms)
+21:59:51 [App     ] error: reference image   3 has no good images in view
+21:59:51 [App     ] error: reference image   4 has no good images in view
+21:59:51 [App     ] Selecting images for dense reconstruction completed: 3 images (5ms)
+21:59:51 [App     ] Reference image   0 paired with 1 views
+21:59:51 [App     ] Reference image   2 paired with 1 views
+22:00:44 [App     ] Depth-map for image   0 with image   1 estimated: 2016x1508 (52s815ms)
+22:00:47 [App     ] Reference image   1 paired with 2 views
+22:01:34 [App     ] Depth-map for image   2 with image   1 estimated: 2016x1508 (50s124ms)
+22:02:23 [App     ] Depth-map for image   1 estimated using  2 images: 2016x1508 (48s634ms)
+22:02:25 [App     ] error: depth map   0 can not be filtered
+22:02:25 [App     ] error: depth map   2 can not be filtered
+22:02:25 [App     ] Depth map   1 filtered using 2 other images: 1759021/2353940 depths discarded (454ms)
+22:02:29 [App     ] Depth-maps fused and filtered: 3 depth-maps, 5665575 depths, 245526 points (4%%) (2s297ms)
+22:02:29 [App     ] Densifying point-cloud completed: 245526 points (2m37s535ms)
+22:02:29 [App     ] Scene saved (276ms):
+	5 images (5 calibrated)
+	245526 points, 0 vertices, 0 faces
+22:02:29 [App     ] Point-cloud saved: 245526 points (22ms)
+22:02:29 [App     ] MEMORYINFO: {
+22:02:29 [App     ] 	VmPeak:	15273212 kB
+22:02:29 [App     ] 	VmSize:	15154764 kB
+22:02:29 [App     ] } ENDINFO
