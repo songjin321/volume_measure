@@ -27,15 +27,12 @@ python src/sfm/measurement.py data/shoe_tag/reconstruction_sequential/robust_ali
 
 ```bash
 cd data/online_data
-python3 ../../src/tcc/html/tcc-backend/uploadServer.py
+python ../../src/tcc/html/tcc-backend/uploadServer.py
 
-cd src/tcc/html/tcc-frontend
-HTTPS=true npm start
-
-在手机浏览器上打开chrome，连上同一个局域网，输入电脑ip地址加3000，使用https，https:192.168.1.201:3000。按一下connect server，连上服务器，刷新一下表示重新测量
+在手机浏览器上打开chrome，连上同一个局域网，输入电脑ip地址加3000，使用https，https:192.168.1.146:3000。按一下connect server，连上服务器，刷新一下表示重新测量
 
 开启在线三维重建,记得将相机内参写到相对应的位置,每次测量显示后按ESC退出显示，不然会阻塞
-python3 src/sfm/sfm_online.py data/online_data  
+python src/sfm/sfm_online.py data/online_data/images  
 
 ```
 

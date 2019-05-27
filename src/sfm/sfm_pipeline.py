@@ -48,11 +48,11 @@ if not os.path.exists(matches_dir):
   os.mkdir(matches_dir)
 
 print ("1. Intrinsics analysis")
-pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params, "-k", "3164.77123462349; 0.; 1992.46181207780; 0.; 3166.29890453081; 1560.62404217458; 0.; 0.; 1."] )
+pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params, "-k", "3100.97303930001; 0; 1981.2491798477354; 0; 3100.97303930001; 1555.1063480419512; 0; 0; 1"] )
 pIntrisics.wait()
 
 print ("2. Compute features")
-pFeatures = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeFeatures"),  "-i", matches_dir+"/sfm_data.json", "-o", matches_dir, "-m", "AKAZE_FLOAT", "-p", "NORMAL", "-n", "12"] )
+pFeatures = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeFeatures"),  "-i", matches_dir+"/sfm_data.json", "-o", matches_dir, "-m", "SIFT", "-p", "NORMAL", "-n", "12"] )
 pFeatures.wait()
 
 print ("3. Compute matches")
@@ -78,6 +78,10 @@ print ("7. Generate sfm_data_aligned.bin with ControlPointsRegistration")
 pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ControlPointsRegistration"),  "-i", reconstruction_dir+"/sfm_data_markers.json", "-o", reconstruction_dir+"/sfm_data_aligned.bin"] )
 pRecons.wait()
 
+print ("8. Convert sfm_data_aligned bin to sfm_data_aligned.json")
+pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ConvertSfM_DataFormat"),  "-i", reconstruction_dir+"/sfm_data_aligned.bin", "-o", reconstruction_dir+"/sfm_data_aligned.json"] )
+pRecons.wait()
+
 # compute final valid structure from the known camera poses
 print ("8. Structure from Known Poses (robust triangulation)")
 pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeStructureFromKnownPoses"),  "-i", reconstruction_dir+"/sfm_data_aligned.bin", "-m", matches_dir, "-f", os.path.join(matches_dir, "matches.f.bin"), "-o", os.path.join(reconstruction_dir,"robust_aligned.bin"), "-r", "4.0"] )
@@ -86,15 +90,6 @@ pRecons.wait()
 pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeSfM_DataColor"),  "-i", reconstruction_dir+"/robust_aligned.bin", "-o", os.path.join(reconstruction_dir,"robust_colorized.ply")] )
 pRecons.wait()
 
-"""
-# optional, compute final valid structure from the known camera poses
-print ("6. Structure from Known Poses (robust triangulation)")
-pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeStructureFromKnownPoses"),  "-i", reconstruction_dir+"/sfm_data.bin", "-m", matches_dir, "-f", os.path.join(matches_dir, "matches.f.bin"), "-o", os.path.join(reconstruction_dir,"robust.bin")] )
-pRecons.wait()
-
-pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeSfM_DataColor"),  "-i", reconstruction_dir+"/robust.bin", "-o", os.path.join(reconstruction_dir,"robust_colorized.ply")] )
-pRecons.wait()
-"""
 print ("9. Measure volume")
 mes_instance = Measurement()
-mes_instance.measure(os.path.join(reconstruction_dir, 'robust_aligned.ply'))
+mes_instance.measure(os.path.join(reconstruction_dir, 'robust_aligned.ply'), os.path.join(reconstruction_dir, 'robust_colorized.ply'))

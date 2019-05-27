@@ -1,0 +1,18 @@
+
+length = 258.576996, width = 149.013855, height = 72.000000 
+length = 490.582576, width = 431.865356, height = 283.000000 
+length = 332.449432, width = 330.749817, height = 89.675664 
+length = 314.337463, width = 164.756912, height = 416.000000 
+length = 314.337463, width = 164.756912, height = 416.000000 
+length = 500.000000, width = 500.000000, height = 81.720732 
+length = 336.000000, width = 329.000000, height = 89.264201 
+length = 348.122528, width = 326.686523, height = 85.315006 
+length = 485.876274, width = 435.725148, height = 306.000000 
+length = 486.307263, width = 431.038049, height = 306.000000 
+length = 258.000000, width = 153.000000, height = 70.000000 
+length = 258.000000, width = 153.000000, height = 70.000000 
+length = 258.000000, width = 153.000000, height = 70.000000 
+length = 500.000000, width = 500.000000, height = 87.748819 
+length = 264.000000, width = 156.000000, height = 70.000000 
+length = 265.263367, width = 154.966629, height = 73.000000 
+length = 427.152008, width = 210.871323, height = 39.000000 

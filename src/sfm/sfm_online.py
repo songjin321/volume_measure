@@ -10,6 +10,7 @@ import multiprocessing
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from open3d import *
+import time
 # Indicate the openMVG binary directory
 OPENMVG_SFM_BIN = "/home/neousys/Software/openMVG_Build_tag/Linux-x86_64-RELEASE"
 
@@ -35,6 +36,7 @@ vis.update_geometry()
 vis.poll_events()
 vis.update_renderer()
 """
+## using colmap to rectify
 
 def renconstruct_measure():
     print("*********start a measurement****************")
@@ -57,19 +59,33 @@ def renconstruct_measure():
     pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ControlPointsRegistration"),  "-i", reconstruction_dir+"/sfm_data_markers.json", "-o", reconstruction_dir+"/sfm_data_aligned.bin"] )
     pRecons.wait()
 
+    print ("8. Convert sfm_data_aligned bin to sfm_data_aligned.json")
+    pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ConvertSfM_DataFormat"),  "-i", reconstruction_dir+"/sfm_data_aligned.bin", "-o", reconstruction_dir+"/sfm_data_aligned.json"] )
+    pRecons.wait()
+
     # compute final valid structure from the known camera poses
-    print ("8. Structure from Known Poses (robust triangulation)")
+    print ("9. Structure from Known Poses (robust triangulation)")
     pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeStructureFromKnownPoses"),  "-i", reconstruction_dir+"/sfm_data_aligned.bin", "-m", matches_dir, "-f", os.path.join(matches_dir, "matches.f.bin"), "-o", os.path.join(reconstruction_dir,"robust_aligned.bin")] )
     pRecons.wait()
 
     pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeSfM_DataColor"),  "-i", reconstruction_dir+"/robust_aligned.bin", "-o", os.path.join(reconstruction_dir,"robust_colorized.ply")] )
     pRecons.wait()    
 
-    print ("9. Measure volume")
-    mes_instance = Measurement()
-    mes_instance.measure(os.path.join(reconstruction_dir, 'robust_aligned.ply'))
+    # use elas to dense the scene
+    '''
+    print ("10. use elas to dense the scene")
+    pRecons = subprocess.Popen( ["/home/neousys/Project/volume_measurement/src/sfm/build/dense", reconstruction_dir+"/sfm_data_aligned.json"] )
+    pRecons.wait()       
+    '''
 
-    # show result
+    print ("11. Measure volume")
+    mes_instance = Measurement()
+    mes_instance.measure(os.path.join(reconstruction_dir, 'robust_aligned.ply'), os.path.join(reconstruction_dir,  'robust_colorized.ply'))
+
+    # show and save result
+    [length, width, height] = mes_instance.result
+    with open("/home/neousys/Project/volume_measurement/src/sfm/result.txt", "a") as file:
+        file.write("length = %f, width = %f, height = %f \n" %(length, width, height))
     """
     global pcd, line_set, length, width, height
     pcd = mes_instance.pcd
@@ -81,7 +97,7 @@ class AddImageEventHandler(FileSystemEventHandler):
     def __init__(self):
         ## image counter in every measure
         self.image_counter = 1
-        self.counter_timeline = 20
+        self.counter_timeline = 6
         self.p = None
     def on_created(self, event):
         super(AddImageEventHandler, self).on_created(event)
@@ -90,16 +106,19 @@ class AddImageEventHandler(FileSystemEventHandler):
         logging.info("Created %s: %s, start a object measurement", what, event.src_path)
         if (what == 'file'): 
             self.image_counter = self.image_counter + 1 
+            if (self.image_counter % 3 != 0):
+                return
+            time.sleep(1)
             ## for each image extract sift feature
             print ("1. Intrinsics analysis")
             print(input_dir)
             # "-k", "1583.57344776699; 0.; 500.842288940575; 0.; 1584.03592624341; 944.606239259718; 0.; 0.; 1."
             # "-k", "3164.77123462349; 0.; 1992.46181207780; 0.; 3166.29890453081; 1560.62404217458; 0.; 0.; 1."
-            pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params] )
+            pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params,"-k", "3100.97303930001; 0; 1981.2491798477354; 0; 3100.97303930001; 1555.1063480419512; 0; 0; 1"] )
             pIntrisics.wait()
 
             print ("2. Compute features")
-            pFeatures = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeFeatures"),  "-i", matches_dir+"/sfm_data.json", "-o", matches_dir, "-m", "SIFT"] )
+            pFeatures = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeFeatures"),  "-i", matches_dir+"/sfm_data.json", "-o", matches_dir, "-m", "SIFT", "-p", "NORMAL", "-n", "6"] )
             pFeatures.wait()
 
             print ("\033[93m Extracted image %d features\033[0m" % self.image_counter)
@@ -108,8 +127,8 @@ class AddImageEventHandler(FileSystemEventHandler):
                 ## use a process to reconstruction and calculate volume
                 if (self.p is None) or (not self.p.is_alive()):
                     self.p = multiprocessing.Process(target=renconstruct_measure)
-                    self.p.start()
-                    self.counter_timeline = self.image_counter + 5
+                    self.p.start()    
+                    self.counter_timeline = self.image_counter + 3
 
 class SfmEventHandler(FileSystemEventHandler):
     def __init__(self):
@@ -130,14 +149,14 @@ class SfmEventHandler(FileSystemEventHandler):
             image_event_handler = AddImageEventHandler()
             ## assign sfm directory
             global input_dir, output_dir, matches_dir, reconstruction_dir
-            input_dir = os.path.join(event.src_path, 'image')
-            output_dir = event.src_path
+            input_dir = os.path.join(event.src_path)
+            output_dir = os.path.join(event.src_path, "result")
             matches_dir = os.path.join(output_dir, "matches")
             reconstruction_dir = os.path.join(output_dir, "reconstruction_sequential")
 
             # Create the input match reconstruction directory if not present
-            if not os.path.exists(input_dir):
-                os.makedirs(input_dir)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
             if not os.path.exists(matches_dir):
                 os.mkdir(matches_dir)
             if not os.path.exists(reconstruction_dir):
